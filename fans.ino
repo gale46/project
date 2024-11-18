@@ -6,13 +6,13 @@ unsigned long previousShakeMillis = 0;  // shake在一定時間內不可重複ca
 const int debounceInterval = 500;  // 防止按鍵抖動
 
 unsigned long previousServoMillis = 0;  // 上次servo作動時間
-int servoPos = 0;  // 當前servo角度
+int servoPos = 90;  // 當前servo角度
 bool movingRight = true;  // servo的移動方向
 
 bool turn_on_off = false;
 unsigned long previousTurnOnMillis = 0;
 int motor = 6;
-int motorSpeed = 200;
+int motorSpeed = 255;
 
 #include <IRremote.hpp>
 #include <Servo.h>
@@ -57,28 +57,28 @@ void loop() {
     IrReceiver.resume();
   }
 
-  // 馬達控制：只有當開關為 ON 時才會啟動，並每秒檢查一次狀態
+  // 馬達控制：只有當開關為 ON 時才會啟動
   if (turn_on_off) {
     analogWrite(motor, motorSpeed);  // 更新馬達速度
   }else{
     analogWrite(motor, 0);
   }
 
-  // 如果按下shake按鍵且0.5秒內沒有重複執行避免function卡住出不來
-  if (shake && millis() - previousServoMillis >= 500) {
+  // 控制伺服馬達的擺動頻率
+  if (shake && millis() - previousServoMillis >= 100) {
     previousServoMillis = millis();
     actionShake();
   }
 }
 void actionShake() {
   if (movingRight) {
-    servoPos += 5;
-    if (servoPos >= 180) {
+    servoPos += 1;
+    if (servoPos >= 135) {
       movingRight = false;  // 最大角度180後向左
     }
   } else {
-    servoPos -= 5;
-    if (servoPos <= 0) {
+    servoPos -= 1;
+    if (servoPos <= 45) {
       movingRight = true;  
     }
   }
@@ -105,7 +105,7 @@ void executeAction(int index) {
       Serial.println("Action: Turn on/off.");
       
       // 只有在按鈕未被按下時才執行狀態切換
-      if (currentMillis - previousTurnOnMillis >= 700) {
+      if (currentMillis - previousTurnOnMillis >= 500) {
         previousTurnOnMillis = currentMillis;
         turn_on_off = !turn_on_off;  // 切換開關狀態
         
@@ -117,14 +117,14 @@ void executeAction(int index) {
 
     case 1:
       Serial.println("Action: Increase speed.");
-      if (motorSpeed < 151) motorSpeed += 50;  // 增加速度
+      if (motorSpeed < 206) motorSpeed += 50;  // 增加速度
       Serial.print("Motor Speed: ");
       Serial.println(motorSpeed);
       break;
 
     case 2:
       Serial.println("Action: Decrease speed.");
-      if (motorSpeed > 50) motorSpeed -= 50;  // 減少速度
+      if (motorSpeed > 70) motorSpeed -= 50;  // 減少速度
       Serial.print("Motor Speed: ");
       Serial.println(motorSpeed);
       break;
