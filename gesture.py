@@ -16,8 +16,11 @@ from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
 
-ser = serial.Serial('COM5', 9600, timeout=1) 
-time.sleep(2)
+try:
+    ser = serial.Serial('COM5', 9600, timeout=1) 
+    time.sleep(2)
+except Exception as e:
+    print(f"Error: {e}")
 
 config = {
     'host': 'localhost',  
